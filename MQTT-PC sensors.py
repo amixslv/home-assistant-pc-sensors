@@ -16,7 +16,13 @@ MQTT_PASS = "Your strong password" # Change this to your own
 UPDATE_INTERVAL = 600  # 10 minūtes# 10 minutes (Time must be in seconds). Can be changed to any other time
 CHECK_INTERVAL = 10    # How often to check charging status (Time is shown in seconds)
 
-client = mqtt.Client()
+# Use new callback API when available; keep compatibility with older paho-mqtt
+try:
+    client = mqtt.Client(
+        callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+    )
+except TypeError:
+    client = mqtt.Client()
 client.username_pw_set(MQTT_USER, MQTT_PASS)
 client.connect(MQTT_BROKER, MQTT_PORT, 60)
 client.loop_start()
@@ -97,7 +103,8 @@ def publish_if_changed(key, value):
     if prev_values.get(key) != value:
         topic = f"{MQTT_TOPIC_PREFIX}/{hostname}/{key}"
         client.publish(topic, value)
-        print(f"[CHANGED] {key} → {value}")
+        # Use ASCII output to avoid UnicodeEncodeError on Windows cp1252 consoles
+        print(f"[CHANGED] {key} -> {value}")
         prev_values[key] = value
 
 # Publish the configuration once
