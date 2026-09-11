@@ -6,13 +6,21 @@ This Python script monitors PC or laptop sensors (battery, CPU, RAM, disk, netwo
 
 ## 📚 Table of Contents
 
-- [✨ Features](#-features)
-- [🧰 Requirements](#-requirements)
-- [🔌 Home Assistant Setup](#-home-assistant-setup)
-- [⚙️ Installation](#️-installation)
-- [🚀 Auto-start on Windows](#-auto-start-on-windows)
+- [🖥️ Home Assistant PC or Laptop Monitor](#️-home-assistant-pc-or-laptop-monitor)
+  - [📚 Table of Contents](#-table-of-contents)
+  - [✨ Features](#-features)
+  - [🧰 Requirements](#-requirements)
+  - [🔌 Home Assistant Setup](#-home-assistant-setup)
+  - [⚙️ Installation](#️-installation)
+    - [1. Clone or download this repository](#1-clone-or-download-this-repository)
+    - [2. Install required Python packages](#2-install-required-python-packages)
+    - [3. Configure MQTT](#3-configure-mqtt)
+    - [4. Run the script](#4-run-the-script)
+  - [🚀 Auto-start on Windows](#-auto-start-on-windows)
+    - [1. Open Task Scheduler](#1-open-task-scheduler)
+    - [2. Create a new task:](#2-create-a-new-task)
 - [📷 Screenshots](#-screenshots)
-- [📄 License](#-license)
+  - [](#)
 
 ---
 
@@ -91,7 +99,43 @@ Open `config.json` and enter your MQTT broker settings:
   "mqtt_port": 1883,
   "mqtt_topic_prefix": "home/laptop",
   "mqtt_user": "mqtt",
-  "mqtt_pass": "your_password"
+  "mqtt_pass": "your_password",
+  "sensors": [
+    "battery_percent",
+    "charging",
+    "battery_time_remaining_minutes",
+    "cpu_percent",
+    "cpu_count_logical",
+    "cpu_count_physical",
+    "cpu_frequency_mhz",
+    "ram_percent",
+    "ram_total_gb",
+    "ram_used_gb",
+    "ram_available_gb",
+    "swap_percent",
+    "swap_total_gb",
+    "swap_used_gb",
+    "disk_percent",
+    "disk_total_gb",
+    "disk_used_gb",
+    "disk_free_gb",
+    "net_sent_mb",
+    "net_recv_mb",
+    "net_packets_sent",
+    "net_packets_recv",
+    "net_errors_in",
+    "net_errors_out",
+    "net_drops_in",
+    "net_drops_out",
+    "uptime_minutes",
+    "process_count",
+    "logged_in_users",
+    "hostname",
+    "os",
+    "os_version",
+    "architecture",
+    "processor"
+  ]
 }
 ```
 
@@ -99,6 +143,46 @@ The settings are saved permanently, so they do not need to be entered after
 each restart. `config.json` is excluded by `.gitignore`; do not remove it
 from `.gitignore` or publish it. If your broker allows anonymous access,
 leave both `mqtt_user` and `mqtt_pass` empty.
+
+The `sensors` list controls which of the built-in Windows sensors are
+published. Remove a name to disable that sensor or add it back to enable it;
+no Python changes are needed. If `sensors` is omitted, all sensors are enabled.
+The supported names are:
+
+- `battery_percent`
+- `charging`
+- `battery_time_remaining_minutes`
+- `cpu_percent`
+- `cpu_count_logical`
+- `cpu_count_physical`
+- `cpu_frequency_mhz`
+- `ram_percent`
+- `ram_total_gb`
+- `ram_used_gb`
+- `ram_available_gb`
+- `swap_percent`
+- `swap_total_gb`
+- `swap_used_gb`
+- `disk_percent`
+- `disk_total_gb`
+- `disk_used_gb`
+- `disk_free_gb`
+- `net_sent_mb`
+- `net_recv_mb`
+- `net_packets_sent`
+- `net_packets_recv`
+- `net_errors_in`
+- `net_errors_out`
+- `net_drops_in`
+- `net_drops_out`
+- `uptime_minutes`
+- `process_count`
+- `logged_in_users`
+- `hostname`
+- `os`
+- `os_version`
+- `architecture`
+- `processor`
 
 ### 4. Run the script
 
