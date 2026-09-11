@@ -26,12 +26,12 @@ def load_configuration():
 config = load_configuration()
 MQTT_BROKER = config.get("mqtt_broker", "")
 MQTT_PORT = config.get("mqtt_port", 1883)
-MQTT_TOPIC_PREFIX = config.get("mqtt_topic_prefix", "home/laptop")
+MQTT_TOPIC_PREFIX = config.get("mqtt_topic_prefix", "")
 MQTT_USER = config.get("mqtt_user", "")
 MQTT_PASS = config.get("mqtt_pass", "")
 
-UPDATE_INTERVAL = 600  # How often to update all sensors (seconds)
-CHECK_INTERVAL = 10    # How often to check charging status (Time is shown in seconds)
+UPDATE_INTERVAL = config.get("UPDATE_INTERVAL", 60)
+CHECK_INTERVAL = config.get("CHECK_INTERVAL", 10)
 
 hostname = socket.gethostname()
 discovery_prefix = "homeassistant"
@@ -77,17 +77,52 @@ manufacturer, model = get_system_info()
 
 # Sensors we will register
 sensor_definitions = {
+    # ============================
+    # BATTERY
+    # ============================
     "battery_percent": {"name": "Battery", "unit": "%", "device_class": "battery"},
     "charging": {"name": "Charging", "icon": "mdi:battery-charging"},
-    "cpu_percent": {"name": "CPU", "unit": "%", "device_class": "power_factor"},
-    "ram_percent": {"name": "RAM", "unit": "%"},
-    "disk_percent": {"name": "Disk", "unit": "%"},
+    
+    # ============================
+    # CPU
+    # ============================
+    "cpu_percent": {"name": "CPU Load", "unit": "%"},
+    
+    # ============================
+    # GPU (praktiski noderīgie)
+    # ============================
+    
+    # ============================
+    # RAM
+    # ============================
+    "ram_percent": {"name": "RAM Load", "unit": "%"},
+
+    # ============================
+    # DISK
+    # ============================
+    "disk_percent": {"name": "Disk Usage", "unit": "%"},
+
+    # ============================
+    # NETWORK
+    # ============================
     "net_sent_mb": {"name": "Net Sent", "unit": "MB"},
     "net_recv_mb": {"name": "Net Received", "unit": "MB"},
+    
+    # ============================
+    # Wi-Fi
+    # ============================
+    
+    # ============================
+    # SYSTEM
+    # ============================
     "uptime_minutes": {"name": "Uptime", "unit": "min"},
     "hostname": {"name": "Hostname"},
-    "os": {"name": "OS"}
+    "os": {"name": "OS"},
+
+  
+    
 }
+
 
 # Publishes sensor configuration in Home Assistant Discovery format
 def publish_discovery_config(client):
@@ -134,7 +169,8 @@ def get_sensors():
         "net_recv_mb": round(psutil.net_io_counters().bytes_recv / 1024 / 1024, 2),
         "uptime_minutes": int(time.time() - psutil.boot_time()) // 60,
         "hostname": hostname,
-        "os": platform.system()
+        "os": platform.system(),
+        
     })
     return sensors
 

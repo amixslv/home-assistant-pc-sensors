@@ -1,7 +1,9 @@
 {
-  "mqtt_broker": "192.168.x.x",
-  "mqtt_port": 1883,
-  "mqtt_topic_prefix": "home/laptop",
-  "mqtt_user": "mqtt",
-  "mqtt_pass": "your_password"
+  "mqtt_broker": "192.168.x.x", // The IP address of the MQTT broker (Home Assistant IP)
+  "mqtt_port": 1883, // The port of the MQTT broker
+  "mqtt_topic_prefix": "home/laptop", // The MQTT topic prefix for this device
+  "mqtt_user": "mqtt", // The username for the MQTT broker
+  "mqtt_pass": "your_password", // The password for the MQTT user
+  "UPDATE_INTERVAL": 60, // How often to update all sensors (seconds)
+  "CHECK_INTERVAL": 10 // How often to check charging status (seconds)
 }
