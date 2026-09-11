@@ -37,23 +37,23 @@ This Python script monitors PC or laptop sensors (battery, CPU, RAM, disk, netwo
 
 ## 🔌 Home Assistant Setup
 
-1. ✅ Install the **MQTT integration** in Home Assistant  
+1. ✅ Install the **MQTT integration** in Home Assistant
    👉 [Go to MQTT Integration](https://my.home-assistant.io/redirect/integration/?domain=mqtt)
     <p>
       <a href="https://my.home-assistant.io/redirect/integration/?domain=mqtt">
         <img src="https://img.shields.io/badge/Home%20Assistant-MQTT%20Integration-blue?logo=home-assistant&style=for-the-badge" alt="MQTT Integration">
       </a>
     </p>
-    
-3. ✅ Install the **Mosquitto broker** (if not already installed)  
+
+2. ✅ Install the **Mosquitto broker** (if not already installed)
    👉 [Go to Mosquitto Add-on](https://my.home-assistant.io/redirect/supervisor_addon/?addon=core_mosquitto)
     <p>
       <a href="https://my.home-assistant.io/redirect/supervisor_addon/?addon=core_mosquitto">
         <img src="https://img.shields.io/badge/Mosquitto-Broker-green?logo=eclipse-mosquitto&style=for-the-badge" alt="Mosquitto Broker">
-      </a> 
+      </a>
     </p>
 
-5. ✅ Create an MQTT user in Home Assistant  
+3. ✅ Create an MQTT user in Home Assistant
    - Go to Mosquitto broker configuration
    - Create a user (e.g. `mqtt`) with a password
    - ![MQTT - 1752228635211](https://github.com/user-attachments/assets/b1f8f754-76e3-453f-aa1c-d12916ae817a)
@@ -115,13 +115,10 @@ After a few seconds, your PC will appear in Home Assistant under Settings → De
 
 ### 2. Create a new task:
 
-  - Trigger: At log on
-   
+   - Trigger: At log on
    - Action: Start a program
-   
-      - Program: python
-      
-      - Arguments: `"C:\Path\To\MQTT-PC sensors.py"`
+     - Program: `python`
+     - Arguments: `"C:\Path\To\MQTT-PC sensors.py"`
 
 Run with highest privileges
 
