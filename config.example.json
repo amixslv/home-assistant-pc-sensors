@@ -1,7 +1,45 @@
 {
-  "mqtt_broker": "192.168.x.x",
-  "mqtt_port": 1883,
-  "mqtt_topic_prefix": "home/laptop",
-  "mqtt_user": "mqtt",
-  "mqtt_pass": "your_password"
+  "mqtt_broker": "192.168.x.x", // The IP address of the MQTT broker (Home Assistant IP)
+  "mqtt_port": 1883, // The port of the MQTT broker
+  "mqtt_topic_prefix": "home/laptop", // The MQTT topic prefix for this device
+  "mqtt_user": "mqtt", // The username for the MQTT broker
+  "mqtt_pass": "your_password", // The password for the MQTT user
+  "UPDATE_INTERVAL": 60, // How often to update all sensors (seconds)
+  "CHECK_INTERVAL": 10, // How often to check charging status (seconds)
+   "sensors": [
+    "battery_percent",
+    "charging",
+    "battery_time_remaining_minutes",
+    "cpu_percent",
+    "cpu_count_logical",
+    "cpu_count_physical",
+    "cpu_frequency_mhz",
+    "ram_percent",
+    "ram_total_gb",
+    "ram_used_gb",
+    "ram_available_gb",
+    "swap_percent",
+    "swap_total_gb",
+    "swap_used_gb",
+    "disk_percent",
+    "disk_total_gb",
+    "disk_used_gb",
+    "disk_free_gb",
+    "net_sent_mb",
+    "net_recv_mb",
+    "net_packets_sent",
+    "net_packets_recv",
+    "net_errors_in",
+    "net_errors_out",
+    "net_drops_in",
+    "net_drops_out",
+    "uptime_minutes",
+    "process_count",
+    "logged_in_users",
+    "hostname",
+    "os",
+    "os_version",
+    "architecture",
+    "processor"
+  ]
 }
