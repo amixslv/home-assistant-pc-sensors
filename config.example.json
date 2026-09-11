@@ -1,0 +1,7 @@
+{
+  "mqtt_broker": "192.168.x.x",
+  "mqtt_port": 1883,
+  "mqtt_topic_prefix": "home/laptop",
+  "mqtt_user": "mqtt",
+  "mqtt_pass": "your_password"
+}

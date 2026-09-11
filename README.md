@@ -75,20 +75,35 @@ cd home-assistant-pc-monitor
 ```bash
 pip install psutil paho-mqtt wmi
 ```
-### 3. Edit MQTT credentials in MQTT-PC sensors.py
+### 3. Configure MQTT
 
-```bash
-MQTT_BROKER = "192.168.x.x"
-MQTT_USER = "your_usernama" # Mosquitto broker configuration username
-MQTT_PASS = "your_password" # Mosquitto broker configuration password
+Copy `config.example.json` to `config.json`:
+
+```powershell
+Copy-Item ".\config.example.json" ".\config.json"
 ```
-P.S.
-There are comments in the script that need to be adjusted.
+
+Open `config.json` and enter your MQTT broker settings:
+
+```json
+{
+  "mqtt_broker": "192.168.x.x",
+  "mqtt_port": 1883,
+  "mqtt_topic_prefix": "home/laptop",
+  "mqtt_user": "mqtt",
+  "mqtt_pass": "your_password"
+}
+```
+
+The settings are saved permanently, so they do not need to be entered after
+each restart. `config.json` is excluded by `.gitignore`; do not remove it
+from `.gitignore` or publish it. If your broker allows anonymous access,
+leave both `mqtt_user` and `mqtt_pass` empty.
 
 ### 4. Run the script
 
-```bash
-python MQTT-PC sensors.py
+```powershell
+python ".\MQTT-PC sensors.py"
 ```
 After a few seconds, your PC will appear in Home Assistant under Settings → Devices & Services → MQTT → Devices.
 
@@ -106,7 +121,7 @@ After a few seconds, your PC will appear in Home Assistant under Settings → De
    
       - Program: python
       
-      - Arguments: "C:\Path\To\MQTT-PC sensors.py"
+      - Arguments: `"C:\Path\To\MQTT-PC sensors.py"`
 
 Run with highest privileges
 
@@ -116,6 +131,4 @@ Run with highest privileges
 ## <img width="495" alt="image" src="https://github.com/user-attachments/assets/5bfa08ca-07e7-47f2-8173-952a7ad4d3e8" />
 
 ---
-2025 © amixslv
-
-
+2026 © amixslv

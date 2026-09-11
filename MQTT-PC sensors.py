@@ -4,32 +4,64 @@ import time
 import socket
 import platform
 import json
+from pathlib import Path
 import wmi
 
-# MQTT configuration
-MQTT_BROKER = "192.168.xx.xx" # Your Home Assistant IP adress
-MQTT_PORT = 1883
-MQTT_TOPIC_PREFIX = "home/laptop"
-MQTT_USER = "Your username" # Change this to your own
-MQTT_PASS = "Your strong password" # Change this to your own
+CONFIG_PATH = Path(__file__).with_name("config.json")
 
-UPDATE_INTERVAL = 600  # 10 minūtes# 10 minutes (Time must be in seconds). Can be changed to any other time
+
+def load_configuration():
+    try:
+        with CONFIG_PATH.open(encoding="utf-8") as config_file:
+            return json.load(config_file)
+    except FileNotFoundError as error:
+        raise RuntimeError(
+            "config.json was not found. Copy config.example.json to "
+            "config.json and enter your MQTT settings."
+        ) from error
+    except json.JSONDecodeError as error:
+        raise RuntimeError(f"Invalid JSON in {CONFIG_PATH}: {error}") from error
+
+
+config = load_configuration()
+MQTT_BROKER = config.get("mqtt_broker", "")
+MQTT_PORT = config.get("mqtt_port", 1883)
+MQTT_TOPIC_PREFIX = config.get("mqtt_topic_prefix", "home/laptop")
+MQTT_USER = config.get("mqtt_user", "")
+MQTT_PASS = config.get("mqtt_pass", "")
+
+UPDATE_INTERVAL = 600  # How often to update all sensors (seconds)
 CHECK_INTERVAL = 10    # How often to check charging status (Time is shown in seconds)
-
-# Use new callback API when available; keep compatibility with older paho-mqtt
-try:
-    client = mqtt.Client(
-        callback_api_version=mqtt.CallbackAPIVersion.VERSION2
-    )
-except TypeError:
-    client = mqtt.Client()
-client.username_pw_set(MQTT_USER, MQTT_PASS)
-client.connect(MQTT_BROKER, MQTT_PORT, 60)
-client.loop_start()
 
 hostname = socket.gethostname()
 discovery_prefix = "homeassistant"
 prev_values = {}
+
+
+def create_mqtt_client():
+    if hasattr(mqtt, "CallbackAPIVersion"):
+        client = mqtt.Client(
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2
+        )
+    else:
+        client = mqtt.Client()
+
+    if MQTT_USER:
+        client.username_pw_set(MQTT_USER, MQTT_PASS)
+    return client
+
+
+def validate_configuration():
+    if not MQTT_BROKER or MQTT_BROKER == "192.168.x.x":
+        raise ValueError(
+            "Set mqtt_broker in config.json."
+        )
+    if MQTT_USER and not MQTT_PASS:
+        raise ValueError(
+            "Set mqtt_pass in config.json, or leave mqtt_user empty for "
+            "anonymous access."
+        )
+
 
 # Gets the manufacturer and model from the computer
 def get_system_info():
@@ -37,8 +69,9 @@ def get_system_info():
         c = wmi.WMI()
         system = c.Win32_ComputerSystem()[0]
         return system.Manufacturer, system.Model
-    except:
+    except (IndexError, AttributeError, wmi.x_wmi):
         return "Unknown", "Unknown"
+
 
 manufacturer, model = get_system_info()
 
@@ -57,7 +90,7 @@ sensor_definitions = {
 }
 
 # Publishes sensor configuration in Home Assistant Discovery format
-def publish_discovery_config():
+def publish_discovery_config(client):
     for key, props in sensor_definitions.items():
         config_topic = f"{discovery_prefix}/sensor/{hostname}_{key}/config"
         state_topic = f"{MQTT_TOPIC_PREFIX}/{hostname}/{key}"
@@ -81,38 +114,71 @@ def publish_discovery_config():
 
         client.publish(config_topic, json.dumps(payload), retain=True)
 
-# Gets sensor data
-def get_sensors():
+
+def get_battery_sensors():
     battery = psutil.sensors_battery()
     return {
         "battery_percent": battery.percent if battery else None,
-        "charging": battery.power_plugged if battery else None,
+        "charging": battery.power_plugged if battery else None
+    }
+
+
+# Gets sensor data
+def get_sensors():
+    sensors = get_battery_sensors()
+    sensors.update({
         "cpu_percent": psutil.cpu_percent(interval=None),
         "ram_percent": psutil.virtual_memory().percent,
-        "disk_percent": psutil.disk_usage('/').percent,
+        "disk_percent": psutil.disk_usage(Path.home().anchor).percent,
         "net_sent_mb": round(psutil.net_io_counters().bytes_sent / 1024 / 1024, 2),
         "net_recv_mb": round(psutil.net_io_counters().bytes_recv / 1024 / 1024, 2),
         "uptime_minutes": int(time.time() - psutil.boot_time()) // 60,
         "hostname": hostname,
         "os": platform.system()
-    }
+    })
+    return sensors
+
 
 # Publish the sensor if the value has changed
-def publish_if_changed(key, value):
-    global prev_values
+def publish_if_changed(client, key, value):
     if prev_values.get(key) != value:
         topic = f"{MQTT_TOPIC_PREFIX}/{hostname}/{key}"
-        client.publish(topic, value)
+        payload = json.dumps(value) if isinstance(value, bool) else value
+        client.publish(topic, payload, retain=True)
         # Use ASCII output to avoid UnicodeEncodeError on Windows cp1252 consoles
         print(f"[CHANGED] {key} -> {value}")
         prev_values[key] = value
 
-# Publish the configuration once
-publish_discovery_config()
 
-# Main cycle
-while True:
-    sensors = get_sensors()
+def publish_sensors(client, sensors):
     for key, value in sensors.items():
-        publish_if_changed(key, value)
-    time.sleep(CHECK_INTERVAL)
+        publish_if_changed(client, key, value)
+
+
+def main():
+    validate_configuration()
+    client = create_mqtt_client()
+    client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    client.loop_start()
+
+    try:
+        publish_discovery_config(client)
+        publish_sensors(client, get_sensors())
+        next_full_update = time.monotonic() + UPDATE_INTERVAL
+
+        while True:
+            time.sleep(CHECK_INTERVAL)
+            if time.monotonic() >= next_full_update:
+                publish_sensors(client, get_sensors())
+                next_full_update = time.monotonic() + UPDATE_INTERVAL
+            else:
+                publish_sensors(client, get_battery_sensors())
+    except KeyboardInterrupt:
+        print("Stopping...")
+    finally:
+        client.loop_stop()
+        client.disconnect()
+
+
+if __name__ == "__main__":
+    main()
