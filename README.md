@@ -139,11 +139,6 @@ Open `config.json` and enter your MQTT broker settings:
 }
 ```
 
-The settings are saved permanently, so they do not need to be entered after
-each restart. `config.json` is excluded by `.gitignore`; do not remove it
-from `.gitignore` or publish it. If your broker allows anonymous access,
-leave both `mqtt_user` and `mqtt_pass` empty.
-
 The `sensors` list controls which of the built-in Windows sensors are
 published. Remove a name to disable that sensor or add it back to enable it;
 no Python changes are needed. If `sensors` is omitted, all sensors are enabled.
