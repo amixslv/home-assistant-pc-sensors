@@ -1,45 +1,299 @@
 {
-  "mqtt_broker": "192.168.x.x", // The IP address of the MQTT broker (Home Assistant IP)
-  "mqtt_port": 1883, // The port of the MQTT broker
-  "mqtt_topic_prefix": "home/laptop", // The MQTT topic prefix for this device
-  "mqtt_user": "mqtt", // The username for the MQTT broker
-  "mqtt_pass": "your_password", // The password for the MQTT user
-  "UPDATE_INTERVAL": 60, // How often to update all sensors (seconds)
-  "CHECK_INTERVAL": 10, // How often to check charging status (seconds)
-   "sensors": [
-    "battery_percent",
-    "charging",
-    "battery_time_remaining_minutes",
-    "cpu_percent",
-    "cpu_count_logical",
-    "cpu_count_physical",
-    "cpu_frequency_mhz",
-    "ram_percent",
-    "ram_total_gb",
-    "ram_used_gb",
-    "ram_available_gb",
-    "swap_percent",
-    "swap_total_gb",
-    "swap_used_gb",
-    "disk_percent",
-    "disk_total_gb",
-    "disk_used_gb",
-    "disk_free_gb",
-    "net_sent_mb",
-    "net_recv_mb",
-    "net_packets_sent",
-    "net_packets_recv",
-    "net_errors_in",
-    "net_errors_out",
-    "net_drops_in",
-    "net_drops_out",
-    "uptime_minutes",
-    "process_count",
-    "logged_in_users",
-    "hostname",
-    "os",
-    "os_version",
-    "architecture",
-    "processor"
+  "mqtt_broker": "192.168.x.x",
+  "mqtt_port": 1883,
+  "mqtt_topic_prefix": "home/laptop",
+  "mqtt_user": "mqtt",
+  "mqtt_pass": "your_password",
+
+  "UPDATE_INTERVAL": 60,
+  "CHECK_INTERVAL": 10,
+
+  "sensors": [
+    {
+      "key": "battery_percent",
+      "name": "Battery",
+      "unit": "%",
+      "device_class": "battery",
+      "expr": "psutil.sensors_battery().percent if psutil.sensors_battery() else None"
+    },
+    {
+      "key": "charging",
+      "name": "Charging",
+      "icon": "mdi:battery-charging",
+      "expr": "psutil.sensors_battery().power_plugged if psutil.sensors_battery() else None"
+    },
+    {
+      "key": "battery_time_remaining_minutes",
+      "name": "Battery Time Remaining",
+      "unit": "min",
+      "device_class": "duration",
+      "expr": "(psutil.sensors_battery().secsleft // 60) if psutil.sensors_battery() and psutil.sensors_battery().secsleft >= 0 else None"
+    },
+
+    {
+      "key": "cpu_percent",
+      "name": "CPU",
+      "unit": "%",
+      "device_class": "power_factor",
+      "expr": "psutil.cpu_percent(interval=None)"
+    },
+    {
+      "key": "cpu_count_logical",
+      "name": "CPU Logical Cores",
+      "expr": "psutil.cpu_count(logical=True)"
+    },
+    {
+      "key": "cpu_count_physical",
+      "name": "CPU Physical Cores",
+      "expr": "psutil.cpu_count(logical=False)"
+    },
+    {
+      "key": "cpu_frequency_mhz",
+      "name": "CPU Frequency",
+      "unit": "MHz",
+      "device_class": "frequency",
+      "expr": "psutil.cpu_freq().current if psutil.cpu_freq() else None"
+    },
+
+    {
+      "key": "ram_percent",
+      "name": "RAM",
+      "unit": "%",
+      "expr": "psutil.virtual_memory().percent"
+    },
+    {
+      "key": "ram_total_gb",
+      "name": "RAM Total",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.virtual_memory().total / 1024**3, 2)"
+    },
+    {
+      "key": "ram_used_gb",
+      "name": "RAM Used",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.virtual_memory().used / 1024**3, 2)"
+    },
+    {
+      "key": "ram_available_gb",
+      "name": "RAM Available",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.virtual_memory().available / 1024**3, 2)"
+    },
+
+    {
+      "key": "swap_percent",
+      "name": "Swap",
+      "unit": "%",
+      "expr": "psutil.swap_memory().percent"
+    },
+    {
+      "key": "swap_total_gb",
+      "name": "Swap Total",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.swap_memory().total / 1024**3, 2)"
+    },
+    {
+      "key": "swap_used_gb",
+      "name": "Swap Used",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.swap_memory().used / 1024**3, 2)"
+    },
+
+    {
+      "key": "disk_percent",
+      "name": "Disk",
+      "unit": "%",
+      "expr": "psutil.disk_usage(Path.home().anchor).percent"
+    },
+    {
+      "key": "disk_total_gb",
+      "name": "Disk Total",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.disk_usage(Path.home().anchor).total / 1024**3, 2)"
+    },
+    {
+      "key": "disk_used_gb",
+      "name": "Disk Used",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.disk_usage(Path.home().anchor).used / 1024**3, 2)"
+    },
+    {
+      "key": "disk_free_gb",
+      "name": "Disk Free",
+      "unit": "GB",
+      "device_class": "data_size",
+      "expr": "round(psutil.disk_usage(Path.home().anchor).free / 1024**3, 2)"
+    },
+
+    {
+      "key": "net_sent_mb",
+      "name": "Net Sent",
+      "unit": "MB",
+      "device_class": "data_size",
+      "expr": "round(psutil.net_io_counters().bytes_sent / 1024**2, 2)"
+    },
+    {
+      "key": "net_recv_mb",
+      "name": "Net Received",
+      "unit": "MB",
+      "device_class": "data_size",
+      "expr": "round(psutil.net_io_counters().bytes_recv / 1024**2, 2)"
+    },
+    {
+      "key": "net_packets_sent",
+      "name": "Net Packets Sent",
+      "expr": "psutil.net_io_counters().packets_sent"
+    },
+    {
+      "key": "net_packets_recv",
+      "name": "Net Packets Received",
+      "expr": "psutil.net_io_counters().packets_recv"
+    },
+    {
+      "key": "net_errors_in",
+      "name": "Net Errors In",
+      "expr": "psutil.net_io_counters().errin"
+    },
+    {
+      "key": "net_errors_out",
+      "name": "Net Errors Out",
+      "expr": "psutil.net_io_counters().errout"
+    },
+    {
+      "key": "net_drops_in",
+      "name": "Net Drops In",
+      "expr": "psutil.net_io_counters().dropin"
+    },
+    {
+      "key": "net_drops_out",
+      "name": "Net Drops Out",
+      "expr": "psutil.net_io_counters().dropout"
+    },
+
+    {
+      "key": "uptime_minutes",
+      "name": "Uptime",
+      "unit": "min",
+      "device_class": "duration",
+      "expr": "int(time.time() - psutil.boot_time()) // 60"
+    },
+    {
+      "key": "process_count",
+      "name": "Processes",
+      "expr": "len(psutil.pids())"
+    },
+    {
+      "key": "logged_in_users",
+      "name": "Logged In Users",
+      "expr": "len(psutil.users())"
+    },
+
+    {
+      "key": "hostname",
+      "name": "Hostname",
+      "expr": "hostname"
+    },
+    {
+      "key": "os",
+      "name": "OS",
+      "expr": "platform.system()"
+    },
+    {
+      "key": "os_version",
+      "name": "OS Version",
+      "expr": "platform.version()"
+    },
+    {
+      "key": "architecture",
+      "name": "Architecture",
+      "expr": "platform.machine()"
+    },
+    {
+      "key": "processor",
+      "name": "Processor",
+      "expr": "platform.processor()"
+    }
+  ],
+
+  "controls": [
+    {
+      "type": "switch",
+      "name": "PC Power",
+      "unique_id": "pc_power",
+      "command": "power",
+      "payload_on": "on",
+      "payload_off": "off",
+      "exec_on": "shutdown /s /t 0",
+      "exec_off": ""
+    },
+    {
+      "type": "button",
+      "name": "Restart PC",
+      "unique_id": "pc_restart",
+      "command": "restart",
+      "exec": "shutdown /r /t 0"
+    },
+    {
+      "type": "button",
+      "name": "Sleep PC",
+      "unique_id": "pc_sleep",
+      "command": "sleep",
+      "exec": "rundll32.exe powrprof.dll,SetSuspendState Sleep"
+    },
+    {
+      "type": "button",
+      "name": "Lock PC",
+      "unique_id": "pc_lock",
+      "command": "lock",
+      "exec": "rundll32.exe user32.dll,LockWorkStation"
+    },
+    {
+      "type": "select",
+      "name": "Power Mode",
+      "unique_id": "pc_power_mode",
+      "command": "power_mode",
+      "options": ["Balanced", "High Performance", "Power Saver"],
+      "exec_map": {
+        "Balanced": "powercfg /setactive SCHEME_BALANCED",
+        "High Performance": "powercfg /setactive SCHEME_MIN",
+        "Power Saver": "powercfg /setactive SCHEME_MAX"
+      }
+    },
+    {
+      "type": "number",
+      "name": "Screen Brightness",
+      "unique_id": "pc_brightness",
+      "command": "brightness",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "exec": "powershell (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,{value})"
+    }
+  ],
+
+  "binary_sensors": [
+    {
+      "name": "PC Locked",
+      "unique_id": "pc_locked",
+      "state": "locked"
+    },
+    {
+      "name": "PC Sleeping",
+      "unique_id": "pc_sleeping",
+      "state": "sleeping"
+    },
+    {
+      "name": "PC Active",
+      "unique_id": "pc_active",
+      "state": "active"
+    }
   ]
 }
